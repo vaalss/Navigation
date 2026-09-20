@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_Maldonado
+package plat.lab7.hernandez_maldonado
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

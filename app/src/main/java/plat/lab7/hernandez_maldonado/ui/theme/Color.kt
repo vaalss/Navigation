@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_Maldonado.ui.theme
+package plat.lab7.hernandez_maldonado.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

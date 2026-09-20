@@ -1,6 +1,5 @@
-package plat.lab7.hernandez_Maldonado.ui.theme
+package plat.lab7.hernandez_maldonado.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

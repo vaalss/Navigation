@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_Maldonado
+package plat.lab7.hernandez_maldonado
 
 import org.junit.Test
 

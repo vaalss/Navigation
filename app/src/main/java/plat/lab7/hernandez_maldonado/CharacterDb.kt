@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_Maldonado
+package plat.lab7.hernandez_maldonado
 
 class CharacterDb {
     private val characters: List<Character> = listOf(
