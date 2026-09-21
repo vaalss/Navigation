@@ -24,7 +24,8 @@ import plat.lab7.hernandez_maldonado.ui.theme.RickAndMortyAppTheme
 
 @Composable
 fun LoginScreen (
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStartClick: () -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -58,7 +59,7 @@ fun LoginScreen (
                 FilledTonalButton(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    onClick = {},
+                    onClick = onStartClick,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -88,6 +89,8 @@ fun LoginScreen (
 @Composable
 fun LoginScreenPreview() {
     RickAndMortyAppTheme {
-        LoginScreen()
+        LoginScreen(
+            onStartClick = {}
+        )
     }
 }
