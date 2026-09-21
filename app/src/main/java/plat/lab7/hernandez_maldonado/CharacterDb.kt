@@ -1,5 +1,4 @@
 package plat.lab7.hernandez_maldonado
-/*
 
 class CharacterDb {
     private val characters: List<Character> = listOf(
@@ -32,4 +31,4 @@ class CharacterDb {
     fun getCharacterById(id: Int): Character {
         return characters.first { it.id == id }
     }
-}*/
+}

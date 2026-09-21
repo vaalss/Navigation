@@ -64,7 +64,9 @@ fun LoginScreen (
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    Text (text = "Empezar")
+                    Text (
+                        text = "Empezar",
+                        style = MaterialTheme.typography.bodyLarge)
                 }
             }
 

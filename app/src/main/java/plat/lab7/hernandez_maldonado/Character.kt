@@ -1,6 +1,5 @@
 package plat.lab7.hernandez_maldonado
 
-/*
 data class Character(
     val id: Int,
     val name: String,
@@ -8,4 +7,4 @@ data class Character(
     val species: String,
     val gender: String,
     val image: String
-)*/
+)
