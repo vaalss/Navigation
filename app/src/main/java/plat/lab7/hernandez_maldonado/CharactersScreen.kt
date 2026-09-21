@@ -73,7 +73,7 @@ private fun CharacterItem(
             Text(
                 text = "Gender: ${character.gender}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

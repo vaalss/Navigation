@@ -1,5 +1,7 @@
 package plat.lab7.hernandez_maldonado
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
@@ -45,6 +47,10 @@ fun AppNavigation(
         }
 
         composable<CharactersDestination> {
+            val activity = LocalActivity.current
+            BackHandler {
+                activity?.finish()
+            }
             CharactersScreen(
                 characters = characterDb.getAllCharacters(),
                 onCharacterClick = { characterId ->
