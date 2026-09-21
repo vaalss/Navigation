@@ -1,13 +1,16 @@
 package plat.lab7.hernandez_maldonado
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +55,7 @@ fun LoginScreen (
                     Image (
                         painter = painterResource(
                             id = R.drawable.rick_and_morty),
-                        contentDescription = "Logo Rick and Morty"
+                        contentDescription = "Logo Rick and Morty",
                     )
                 }
 
