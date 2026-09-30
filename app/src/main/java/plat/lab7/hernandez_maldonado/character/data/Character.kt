@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_maldonado
+package plat.lab7.hernandez_maldonado.character.data
 
 data class Character(
     val id: Int,

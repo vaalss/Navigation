@@ -1,16 +1,13 @@
-package plat.lab7.hernandez_maldonado
+package plat.lab7.hernandez_maldonado.login.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import plat.lab7.hernandez_maldonado.ui.theme.RickAndMortyAppTheme
+import plat.lab7.hernandez_maldonado.R
+import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 
 @Composable
 fun LoginScreen (

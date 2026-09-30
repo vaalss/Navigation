@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_maldonado
+package plat.lab7.hernandez_maldonado.core.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -10,6 +10,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import plat.lab7.hernandez_maldonado.character.data.CharacterDb
+import plat.lab7.hernandez_maldonado.character.ui.characterdetails.CharacterDetailsScreen
+import plat.lab7.hernandez_maldonado.character.ui.characters.CharactersScreen
+import plat.lab7.hernandez_maldonado.login.ui.LoginScreen
 
 @Serializable
 data object LoginDestination

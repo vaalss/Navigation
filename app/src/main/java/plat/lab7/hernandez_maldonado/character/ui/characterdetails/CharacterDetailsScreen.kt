@@ -1,8 +1,8 @@
-package plat.lab7.hernandez_maldonado
+package plat.lab7.hernandez_maldonado.character.ui.characterdetails
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.tooling.preview.Preview
-import plat.lab7.hernandez_maldonado.ui.theme.RickAndMortyAppTheme
+import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import plat.lab7.hernandez_maldonado.character.data.Character
 
 @Composable
 private fun CharacterDetailRow(

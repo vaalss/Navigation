@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_maldonado.ui.theme
+package plat.lab7.hernandez_maldonado.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

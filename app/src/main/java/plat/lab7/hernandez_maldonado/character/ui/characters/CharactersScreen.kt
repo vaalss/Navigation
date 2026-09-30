@@ -1,4 +1,4 @@
-package plat.lab7.hernandez_maldonado
+package plat.lab7.hernandez_maldonado.character.ui.characters
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
-import plat.lab7.hernandez_maldonado.ui.theme.RickAndMortyAppTheme
+import plat.lab7.hernandez_maldonado.character.data.Character
+import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 
 
 @Composable
