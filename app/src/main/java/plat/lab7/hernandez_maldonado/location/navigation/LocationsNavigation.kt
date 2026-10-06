@@ -12,6 +12,10 @@ import kotlinx.serialization.Serializable
 import plat.lab7.hernandez_maldonado.location.data.LocationDb
 import plat.lab7.hernandez_maldonado.location.ui.locationdetails.LocationDetailsScreen
 import plat.lab7.hernandez_maldonado.location.ui.locations.LocationsScreen
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import plat.lab7.hernandez_maldonado.location.ui.locations.LocationsViewModel
 
 @Serializable
 data object LocationsGraph
@@ -32,20 +36,28 @@ fun NavGraphBuilder.locationsGraph(
     ) {
         composable<LocationsDestination> {
             val activity = LocalActivity.current
-            val locationDb = remember { LocationDb() }
+
+            val locationsViewModel: LocationsViewModel = viewModel()
+            val state by locationsViewModel.uiState.collectAsStateWithLifecycle()
 
             BackHandler {
                 activity?.finish()
             }
 
             LocationsScreen(
-                locations = locationDb.getAllLocations(),
+                state = state,
                 onLocationClick = { locationId ->
                     navController.navigate(
                         LocationDetailsDestination(
                             locationId = locationId
                         )
                     )
+                },
+                onLoadingClick = {
+                    locationsViewModel.showError()
+                },
+                onRetryClick = {
+                    locationsViewModel.loadLocations()
                 }
             )
         }
