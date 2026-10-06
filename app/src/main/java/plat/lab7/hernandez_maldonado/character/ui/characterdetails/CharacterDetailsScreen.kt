@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import plat.lab7.hernandez_maldonado.character.data.Character
+import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
+import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
 
 @Composable
 private fun CharacterDetailRow(
@@ -61,8 +63,10 @@ private fun CharacterDetailRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailsScreen(
-    character: Character,
+    state: CharacterDetailsUiState,
     onBackClick: () -> Unit,
+    onLoadingClick: () -> Unit,
+    onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -71,73 +75,101 @@ fun CharacterDetailsScreen(
             .safeDrawingPadding(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            TopAppBar(
-                modifier = Modifier.height(60.dp),
-                title = {Text(text = "Characters details")},
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBackClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Regresar"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
+        val character = state.data
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AsyncImage(
-                    model = character.image,
-                    contentDescription = "Imagen de ${character.name}",
-                    modifier = Modifier
-                        .size(220.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+        when {
+            state.isLoading -> {
+                LoadingContent(
+                    onLoadingClick = onLoadingClick
                 )
+            }
 
-                Text(
-                    text = character.name,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+            state.hasError -> {
+                ErrorContent(
+                    message = "Error al obtener detalle del personaje.",
+                    onRetryClick = onRetryClick
                 )
+            }
 
+            character != null -> {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    CharacterDetailRow(
-                        label = "Species:",
-                        value = character.species
+                    TopAppBar(
+                        modifier = Modifier.height(60.dp),
+                        title = {
+                            Text(text = "Characters details")
+                        },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = onBackClick
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Regresar"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     )
 
-                    CharacterDetailRow(
-                        label = "Status:",
-                        value = character.status
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AsyncImage(
+                            model = character.image,
+                            contentDescription = "Imagen de ${character.name}",
+                            modifier = Modifier
+                                .size(220.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
 
-                    CharacterDetailRow(
-                        label = "Gender:",
-                        value = character.gender
-                    )
+                        Text(
+                            text = character.name,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            CharacterDetailRow(
+                                label = "Species:",
+                                value = character.species
+                            )
+
+                            CharacterDetailRow(
+                                label = "Status:",
+                                value = character.status
+                            )
+
+                            CharacterDetailRow(
+                                label = "Gender:",
+                                value = character.gender
+                            )
+                        }
+                    }
                 }
+            }
+
+            else -> {
+                ErrorContent(
+                    message = "No se encontró el personaje.",
+                    onRetryClick = onRetryClick
+                )
             }
         }
     }
@@ -161,8 +193,14 @@ private fun CharacterDetailsScreenPreview() {
 
     RickAndMortyAppTheme {
         CharacterDetailsScreen(
-            character = previewCharacter,
-            onBackClick = {}
+            state = CharacterDetailsUiState(
+                isLoading = false,
+                data = previewCharacter,
+                hasError = false
+            ),
+            onBackClick = {},
+            onLoadingClick = {},
+            onRetryClick = {}
         )
     }
 }
