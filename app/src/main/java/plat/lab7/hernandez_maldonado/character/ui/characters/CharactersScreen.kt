@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import plat.lab7.hernandez_maldonado.character.data.Character
 import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
+import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
+import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
 
 
 @Composable
@@ -83,9 +85,11 @@ private fun CharacterItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharactersScreen(
-    modifier: Modifier = Modifier,
-    characters: List<Character>,
-    onCharacterClick: (Int) -> Unit
+    state: CharactersUiState,
+    onCharacterClick: (Int) -> Unit,
+    onLoadingClick: () -> Unit,
+    onRetryClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
@@ -96,31 +100,53 @@ fun CharactersScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            TopAppBar(
-                title = {Text(text = "Characters")},
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.height(60.dp)
-            )
+            if (!state.isLoading && !state.hasError) {
+                TopAppBar(
+                    title = {
+                        Text(text = "Characters")
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    modifier = Modifier.height(60.dp)
+                )
+            }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(
-                    items = characters,
-                    key = { character -> character.id }
-                ) { character ->
-                    CharacterItem(
-                        character = character,
-                        onClick = {
-                            onCharacterClick(character.id)
-                        }
+            when {
+                state.isLoading -> {
+                    LoadingContent(
+                        onLoadingClick = onLoadingClick,
+                        modifier = Modifier.weight(1f)
                     )
+                }
 
+                state.hasError -> {
+                    ErrorContent(
+                        message = "Error al obtener listado de personajes.",
+                        onRetryClick = onRetryClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        items(
+                            items = state.data,
+                            key = { character -> character.id }
+                        ) { character ->
+                            CharacterItem(
+                                character = character,
+                                onClick = {
+                                    onCharacterClick(character.id)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -171,8 +197,14 @@ private fun CharactersScreenPreview() {
 
     RickAndMortyAppTheme {
         CharactersScreen(
-            characters = previewCharacters,
-            onCharacterClick = {}
+            state = CharactersUiState(
+                isLoading = false,
+                data = previewCharacters,
+                hasError = false
+            ),
+            onCharacterClick = {},
+            onLoadingClick = {},
+            onRetryClick = {}
         )
     }
 }
