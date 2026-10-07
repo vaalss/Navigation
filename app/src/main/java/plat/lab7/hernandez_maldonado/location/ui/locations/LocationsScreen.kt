@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 import plat.lab7.hernandez_maldonado.location.data.Location
+import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
+import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
 
 @Composable
 private fun LocationItem(
@@ -53,8 +55,10 @@ private fun LocationItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationsScreen(
-    locations: List<Location>,
+    state: LocationsUiState,
     onLocationClick: (Int) -> Unit,
+    onLoadingClick: () -> Unit,
+    onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -66,32 +70,53 @@ fun LocationsScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            TopAppBar(
-                title = {
-                    Text(text = "Locations")
-                },
-                modifier = Modifier.height(60.dp),
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(
-                    items = locations,
-                    key = { location -> location.id }
-                ) { location ->
-                    LocationItem(
-                        location = location,
-                        onClick = {
-                            onLocationClick(location.id)
-                        }
+            if (!state.isLoading && !state.hasError) {
+                TopAppBar(
+                    title = {
+                        Text(text = "Locations")
+                    },
+                    modifier = Modifier.height(60.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+                )
+            }
+
+            when {
+                state.isLoading -> {
+                    LoadingContent(
+                        onLoadingClick = onLoadingClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                state.hasError -> {
+                    ErrorContent(
+                        message = "Error al obtener listado de ubicaciones.",
+                        onRetryClick = onRetryClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        items(
+                            items = state.data,
+                            key = { location -> location.id }
+                        ) { location ->
+                            LocationItem(
+                                location = location,
+                                onClick = {
+                                    onLocationClick(location.id)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -128,8 +153,14 @@ private fun LocationsScreenPreview() {
 
     RickAndMortyAppTheme {
         LocationsScreen(
-            locations = previewLocations,
-            onLocationClick = {}
+            state = LocationsUiState(
+                isLoading = false,
+                data = previewLocations,
+                hasError = false
+            ),
+            onLocationClick = {},
+            onLoadingClick = {},
+            onRetryClick = {}
         )
     }
 }

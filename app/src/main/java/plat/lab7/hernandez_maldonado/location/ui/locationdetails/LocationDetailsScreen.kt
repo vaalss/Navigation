@@ -27,6 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 import plat.lab7.hernandez_maldonado.location.data.Location
+import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
+import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
 
 @Composable
 private fun LocationDetailRow(
@@ -56,8 +58,10 @@ private fun LocationDetailRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationDetailsScreen(
-    location: Location,
+    state: LocationDetailsUiState,
     onBackClick: () -> Unit,
+    onLoadingClick: () -> Unit,
+    onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -66,63 +70,91 @@ fun LocationDetailsScreen(
             .safeDrawingPadding(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            TopAppBar(
-                title = {
-                    Text(text = "Location details")
-                },
-                modifier = Modifier.height(60.dp),
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Regresar"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
+        val location = state.data
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                Text(
-                    text = location.name,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+        when {
+            state.isLoading -> {
+                LoadingContent(
+                    onLoadingClick = onLoadingClick
                 )
+            }
 
+            state.hasError -> {
+                ErrorContent(
+                    message = "Error al obtener detalle de la ubicación.",
+                    onRetryClick = onRetryClick
+                )
+            }
+
+            location != null -> {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    LocationDetailRow(
-                        label = "ID:",
-                        value = location.id.toString()
+                    TopAppBar(
+                        title = {
+                            Text(text = "Location details")
+                        },
+                        modifier = Modifier.height(60.dp),
+                        navigationIcon = {
+                            IconButton(
+                                onClick = onBackClick
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Regresar"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     )
 
-                    LocationDetailRow(
-                        label = "Type:",
-                        value = location.type
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(32.dp)
+                    ) {
+                        Text(
+                            text = location.name,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
 
-                    LocationDetailRow(
-                        label = "Dimension:",
-                        value = location.dimension
-                    )
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            LocationDetailRow(
+                                label = "ID:",
+                                value = location.id.toString()
+                            )
+
+                            LocationDetailRow(
+                                label = "Type:",
+                                value = location.type
+                            )
+
+                            LocationDetailRow(
+                                label = "Dimension:",
+                                value = location.dimension
+                            )
+                        }
+                    }
                 }
+            }
+
+            else -> {
+                ErrorContent(
+                    message = "No se encontró la ubicación.",
+                    onRetryClick = onRetryClick
+                )
             }
         }
     }
@@ -144,8 +176,14 @@ private fun LocationDetailsScreenPreview() {
 
     RickAndMortyAppTheme {
         LocationDetailsScreen(
-            location = previewLocation,
-            onBackClick = {}
+            state = LocationDetailsUiState(
+                isLoading = false,
+                data = previewLocation,
+                hasError = false
+            ),
+            onBackClick = {},
+            onLoadingClick = {},
+            onRetryClick = {}
         )
     }
 }
