@@ -29,7 +29,8 @@ import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 @Composable
 fun ProfileScreen (
     onLogoutClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    name: String
 ) {
     Surface (
         modifier = modifier
@@ -75,7 +76,7 @@ fun ProfileScreen (
                     )
 
                     Text (
-                        text = "Valeria Hernández",
+                        text = name,
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -124,6 +125,7 @@ fun ProfileScreen (
 private fun ProfileScreenPreview() {
     RickAndMortyAppTheme {
         ProfileScreen(
+            name = "Valeria Hernández",
             onLogoutClick = {}
         )
     }

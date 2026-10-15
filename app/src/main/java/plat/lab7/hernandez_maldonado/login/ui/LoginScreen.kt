@@ -22,12 +22,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.lab7.hernandez_maldonado.R
 import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @Composable
 fun LoginScreen (
     modifier: Modifier = Modifier,
-    onStartClick: () -> Unit
+    onStartClick: (String) -> Unit
 ) {
+
+    var nameInput by rememberSaveable {
+        mutableStateOf("")
+    }
+
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -57,14 +67,27 @@ fun LoginScreen (
                     )
                 }
 
+                OutlinedTextField(
+                    value = nameInput,
+                    onValueChange = { newValue ->
+                        nameInput = newValue
+                    },
+                    label = {
+                        Text("Nombre")
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 FilledTonalButton(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    onClick = onStartClick,
+                    onClick = {onStartClick(nameInput)},
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    ),
+                    enabled = nameInput.isNotBlank(),
                 ) {
                     Text (
                         text = "Empezar",

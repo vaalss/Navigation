@@ -26,6 +26,18 @@ import plat.lab7.hernandez_maldonado.location.navigation.LocationsGraph
 import plat.lab7.hernandez_maldonado.location.navigation.locationsGraph
 import plat.lab7.hernandez_maldonado.login.ui.LoginScreen
 import plat.lab7.hernandez_maldonado.profile.ui.ProfileScreen
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import plat.lab7.hernandez_maldonado.core.data.DataStorePreferences
+import plat.lab7.hernandez_maldonado.core.ui.session.SessionViewModel
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 
 @Serializable
 data object LoginDestination
@@ -36,10 +48,27 @@ data object MainGraph
 @Serializable
 data object ProfileDestination
 
+@Serializable
+data object SessionCheckDestination
+
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
+
+    val appContext = LocalContext.current.applicationContext
+    val sessionViewModel: SessionViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                SessionViewModel(
+                    preferences = DataStorePreferences(appContext)
+                )
+            }
+        }
+    )
+
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
@@ -86,11 +115,38 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = LoginDestination,
+            startDestination = SessionCheckDestination,
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
         ) {
+            composable<SessionCheckDestination> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+
+                LaunchedEffect(sessionState.isLoading, sessionState.name) {
+                    if (!sessionState.isLoading) {
+                        if (sessionState.name != null) {
+                            navController.navigate(MainGraph) {
+                                popUpTo<SessionCheckDestination> {
+                                    inclusive = true
+                                }
+                            }
+                        } else {
+                            navController.navigate(LoginDestination) {
+                                popUpTo<SessionCheckDestination> {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             composable<LoginDestination> {
                 val activity = LocalActivity.current
 
@@ -98,13 +154,19 @@ fun AppNavigation(
                     activity?.finish()
                 }
 
-                LoginScreen(
-                    onStartClick = {
+                LaunchedEffect(sessionState.name) {
+                    if (sessionState.name != null) {
                         navController.navigate(MainGraph) {
                             popUpTo<LoginDestination> {
                                 inclusive = true
                             }
                         }
+                    }
+                }
+
+                LoginScreen(
+                    onStartClick = { name ->
+                        sessionViewModel.login(name)
                     }
                 )
             }
@@ -123,14 +185,21 @@ fun AppNavigation(
                         activity?.finish()
                     }
 
-                    ProfileScreen(
-                        onLogoutClick = {
+                    LaunchedEffect(sessionState.isLoading, sessionState.name) {
+                        if (!sessionState.isLoading && sessionState.name == null) {
                             navController.navigate(LoginDestination) {
                                 popUpTo<MainGraph> {
                                     inclusive = true
                                 }
                                 launchSingleTop = true
                             }
+                        }
+                    }
+
+                    ProfileScreen(
+                        name = sessionState.name.orEmpty(),
+                        onLogoutClick = {
+                            sessionViewModel.logout()
                         }
                     )
                 }
