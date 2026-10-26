@@ -1,6 +1,7 @@
 package plat.lab7.hernandez_maldonado.core.ui.session
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -8,9 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab7.hernandez_maldonado.core.data.DataStorePreferences
 
-class SessionViewModel(
-    private val preferences: DataStorePreferences
-) : ViewModel() {
+class SessionViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val preferences = DataStorePreferences(application)
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()

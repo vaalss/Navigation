@@ -26,18 +26,15 @@ import plat.lab7.hernandez_maldonado.location.navigation.LocationsGraph
 import plat.lab7.hernandez_maldonado.location.navigation.locationsGraph
 import plat.lab7.hernandez_maldonado.login.ui.LoginScreen
 import plat.lab7.hernandez_maldonado.profile.ui.ProfileScreen
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import plat.lab7.hernandez_maldonado.core.data.DataStorePreferences
 import plat.lab7.hernandez_maldonado.core.ui.session.SessionViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+
 
 @Serializable
 data object LoginDestination
@@ -56,16 +53,7 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
 
-    val appContext = LocalContext.current.applicationContext
-    val sessionViewModel: SessionViewModel = viewModel(
-        factory = viewModelFactory {
-            initializer {
-                SessionViewModel(
-                    preferences = DataStorePreferences(appContext)
-                )
-            }
-        }
-    )
+    val sessionViewModel: SessionViewModel = viewModel()
 
     val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
 
