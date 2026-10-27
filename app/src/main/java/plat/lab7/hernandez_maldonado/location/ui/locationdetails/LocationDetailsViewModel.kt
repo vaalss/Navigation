@@ -1,7 +1,8 @@
 package plat.lab7.hernandez_maldonado.location.ui.locationdetails
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.CancellationException
@@ -11,14 +12,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import plat.lab7.hernandez_maldonado.location.data.LocationDb
+import plat.lab7.hernandez_maldonado.RickAndMortyApp
+import plat.lab7.hernandez_maldonado.location.data.toModel
 import plat.lab7.hernandez_maldonado.location.navigation.LocationDetailsDestination
 
 class LocationDetailsViewModel(
+    application: Application,
     savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
-    private val locationDb = LocationDb()
+    private val locationDao = (application as RickAndMortyApp)
+        .database
+        .locationDao()
 
     private val locationId = savedStateHandle
         .toRoute<LocationDetailsDestination>()
@@ -46,15 +51,15 @@ class LocationDetailsViewModel(
             try {
                 delay(2000)
 
-                val location = locationDb.getLocationById(
-                    id = locationId
-                )
+                locationDao.getById(locationId).collect { entity ->
+                    val location = entity?.toModel()
 
-                _uiState.value = LocationDetailsUiState(
-                    isLoading = false,
-                    data = location,
-                    hasError = false
-                )
+                    _uiState.value = LocationDetailsUiState(
+                        isLoading = false,
+                        data = location,
+                        hasError = location == null
+                    )
+                }
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
@@ -81,4 +86,3 @@ class LocationDetailsViewModel(
         )
     }
 }
-

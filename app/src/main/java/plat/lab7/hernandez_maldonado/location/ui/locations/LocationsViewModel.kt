@@ -1,6 +1,7 @@
 package plat.lab7.hernandez_maldonado.location.ui.locations
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -9,11 +10,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import plat.lab7.hernandez_maldonado.location.data.LocationDb
+import plat.lab7.hernandez_maldonado.RickAndMortyApp
+import plat.lab7.hernandez_maldonado.location.data.toModel
 
-class LocationsViewModel : ViewModel() {
+class LocationsViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val locationDb = LocationDb()
+    private val locationDao = (application as RickAndMortyApp)
+        .database
+        .locationDao()
 
     private val _uiState = MutableStateFlow(LocationsUiState())
     val uiState: StateFlow<LocationsUiState> = _uiState.asStateFlow()
@@ -37,13 +43,17 @@ class LocationsViewModel : ViewModel() {
             try {
                 delay(4000)
 
-                val locations = locationDb.getAllLocations()
+                locationDao.getAll().collect { entities ->
+                    val locations = entities.map { entity ->
+                        entity.toModel()
+                    }
 
-                _uiState.value = LocationsUiState(
-                    isLoading = false,
-                    data = locations,
-                    hasError = false
-                )
+                    _uiState.value = LocationsUiState(
+                        isLoading = false,
+                        data = locations,
+                        hasError = false
+                    )
+                }
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {

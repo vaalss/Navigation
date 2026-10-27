@@ -1,7 +1,8 @@
 package plat.lab7.hernandez_maldonado.character.ui.characterdetails
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.CancellationException
@@ -11,14 +12,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import plat.lab7.hernandez_maldonado.character.data.CharacterDb
+import plat.lab7.hernandez_maldonado.RickAndMortyApp
+import plat.lab7.hernandez_maldonado.character.data.toModel
 import plat.lab7.hernandez_maldonado.character.navigation.CharacterDetailsDestination
 
 class CharacterDetailsViewModel(
+    application: Application,
     savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
-    private val characterDb = CharacterDb()
+    private val characterDao = (application as RickAndMortyApp)
+        .database
+        .characterDao()
 
     private val characterId = savedStateHandle
         .toRoute<CharacterDetailsDestination>()
@@ -46,15 +51,15 @@ class CharacterDetailsViewModel(
             try {
                 delay(2000)
 
-                val character = characterDb.getCharacterById(
-                    id = characterId
-                )
+                characterDao.getById(characterId).collect { entity ->
+                    val character = entity?.toModel()
 
-                _uiState.value = CharacterDetailsUiState(
-                    isLoading = false,
-                    data = character,
-                    hasError = false
-                )
+                    _uiState.value = CharacterDetailsUiState(
+                        isLoading = false,
+                        data = character,
+                        hasError = character == null
+                    )
+                }
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
