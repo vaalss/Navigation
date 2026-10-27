@@ -27,10 +27,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.LinearProgressIndicator
 
 @Composable
-fun LoginScreen (
+fun LoginScreen(
     modifier: Modifier = Modifier,
+    isSyncing: Boolean = false,
+    errorMessage: String? = null,
     onStartClick: (String) -> Unit
 ) {
 
@@ -76,6 +79,7 @@ fun LoginScreen (
                         Text("Nombre")
                     },
                     singleLine = true,
+                    enabled = !isSyncing,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -87,11 +91,27 @@ fun LoginScreen (
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
-                    enabled = nameInput.isNotBlank(),
+                    enabled = nameInput.isNotBlank() && !isSyncing,
                 ) {
-                    Text (
-                        text = "Empezar",
-                        style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = if (isSyncing) "Sincronizando..." else "Empezar",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                if (isSyncing) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
 

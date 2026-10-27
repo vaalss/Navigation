@@ -153,6 +153,8 @@ fun AppNavigation(
                 }
 
                 LoginScreen(
+                    isSyncing = sessionState.isSyncing,
+                    errorMessage = sessionState.errorMessage,
                     onStartClick = { name ->
                         sessionViewModel.login(name)
                     }

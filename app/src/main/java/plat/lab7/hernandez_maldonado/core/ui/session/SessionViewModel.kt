@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import plat.lab7.hernandez_maldonado.RickAndMortyApp
 import plat.lab7.hernandez_maldonado.core.data.DataStorePreferences
 import plat.lab7.hernandez_maldonado.core.data.InitialSync
+import androidx.room3.immediateTransaction
+import androidx.room3.useWriterConnection
 
 class SessionViewModel(
     application: Application
@@ -19,8 +21,10 @@ class SessionViewModel(
 
     private val preferences = DataStorePreferences(application)
 
+    private val database = (application as RickAndMortyApp).database
+
     private val initialSync = InitialSync(
-        database = (application as RickAndMortyApp).database
+        database = database
     )
 
     private val _uiState = MutableStateFlow(SessionUiState())
@@ -82,6 +86,13 @@ class SessionViewModel(
 
     fun logout() {
         viewModelScope.launch {
+            database.useWriterConnection { connection ->
+                connection.immediateTransaction {
+                    database.characterDao().deleteAll()
+                    database.locationDao().deleteAll()
+                }
+            }
+
             preferences.clearName()
         }
     }
