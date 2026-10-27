@@ -34,6 +34,8 @@ import coil3.compose.AsyncImage
 import plat.lab7.hernandez_maldonado.character.data.Character
 import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
 import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 
 @Composable
 private fun CharacterDetailRow(
@@ -65,6 +67,7 @@ private fun CharacterDetailRow(
 fun CharacterDetailsScreen(
     state: CharacterDetailsUiState,
     onBackClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onLoadingClick: () -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -110,6 +113,26 @@ fun CharacterDetailsScreen(
                                 )
                             }
                         },
+
+                        actions = {
+                            IconButton(
+                                onClick = onFavoriteClick
+                            ) {
+                                Icon(
+                                    imageVector = if (character.isFavorite) {
+                                        Icons.Filled.Favorite
+                                    } else {
+                                        Icons.Filled.FavoriteBorder
+                                    },
+                                    contentDescription = if (character.isFavorite) {
+                                        "Quitar de favoritos"
+                                    } else {
+                                        "Agregar a favoritos"
+                                    }
+                                )
+                            }
+                        },
+
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -200,7 +223,8 @@ private fun CharacterDetailsScreenPreview() {
             ),
             onBackClick = {},
             onLoadingClick = {},
-            onRetryClick = {}
+            onRetryClick = {},
+            onFavoriteClick = {}
         )
     }
 }

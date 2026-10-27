@@ -32,14 +32,20 @@ import plat.lab7.hernandez_maldonado.character.data.Character
 import plat.lab7.hernandez_maldonado.core.ui.theme.RickAndMortyAppTheme
 import plat.lab7.hernandez_maldonado.core.ui.components.ErrorContent
 import plat.lab7.hernandez_maldonado.core.ui.components.LoadingContent
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 
 @Composable
 private fun CharacterItem(
     character: Character,
     onClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -58,6 +64,7 @@ private fun CharacterItem(
         )
 
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
@@ -79,6 +86,28 @@ private fun CharacterItem(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+
+    IconButton(
+        onClick = onFavoriteClick
+    ) {
+        Icon(
+            imageVector = if (character.isFavorite) {
+                Icons.Filled.Favorite
+            } else {
+                Icons.Filled.FavoriteBorder
+            },
+            contentDescription = if (character.isFavorite) {
+                "Quitar de favoritos"
+            } else {
+                "Agregar a favoritos"
+            },
+            tint = if (character.isFavorite) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
+        )
+    }
     }
 }
 
@@ -87,10 +116,11 @@ private fun CharacterItem(
 fun CharactersScreen(
     state: CharactersUiState,
     onCharacterClick: (Int) -> Unit,
+    onFavoriteClick: (Int) -> Unit,
     onLoadingClick: () -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -143,6 +173,9 @@ fun CharactersScreen(
                                 character = character,
                                 onClick = {
                                     onCharacterClick(character.id)
+                                },
+                                onFavoriteClick = {
+                                    onFavoriteClick(character.id)
                                 }
                             )
                         }
@@ -200,9 +233,10 @@ private fun CharactersScreenPreview() {
             state = CharactersUiState(
                 isLoading = false,
                 data = previewCharacters,
-                hasError = false
+                hasError = false,
             ),
             onCharacterClick = {},
+            onFavoriteClick = {},
             onLoadingClick = {},
             onRetryClick = {}
         )

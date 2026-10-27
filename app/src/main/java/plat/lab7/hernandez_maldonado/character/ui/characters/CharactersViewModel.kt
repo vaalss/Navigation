@@ -66,6 +66,19 @@ class CharactersViewModel(
         }
     }
 
+    fun toggleFavorite(characterId: Int) {
+        val character = _uiState.value.data.firstOrNull {
+            it.id == characterId
+        } ?: return
+
+        viewModelScope.launch {
+            characterDao.updateFavorite(
+                id = characterId,
+                isFavorite = !character.isFavorite
+            )
+        }
+    }
+
     fun showError() {
         if (!_uiState.value.isLoading) {
             return

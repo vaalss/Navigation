@@ -72,6 +72,17 @@ class CharacterDetailsViewModel(
         }
     }
 
+    fun toggleFavorite() {
+        val character = _uiState.value.data ?: return
+
+        viewModelScope.launch {
+            characterDao.updateFavorite(
+                id = character.id,
+                isFavorite = !character.isFavorite
+            )
+        }
+    }
+
     fun showError() {
         if (!_uiState.value.isLoading) {
             return

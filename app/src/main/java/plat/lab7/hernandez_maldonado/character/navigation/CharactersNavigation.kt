@@ -56,6 +56,9 @@ fun NavGraphBuilder.charactersGraph(
                 },
                 onRetryClick = {
                     charactersViewModel.loadCharacters()
+                },
+                onFavoriteClick = { characterId ->
+                    charactersViewModel.toggleFavorite(characterId)
                 }
             )
         }
@@ -74,7 +77,10 @@ fun NavGraphBuilder.charactersGraph(
                 },
                 onRetryClick = {
                     characterDetailsViewModel.loadCharacter()
-                }
+                },
+                onFavoriteClick = {
+                    characterDetailsViewModel.toggleFavorite()
+                },
             )
         }
     }
