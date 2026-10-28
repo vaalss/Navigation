@@ -167,7 +167,7 @@ fun CharactersScreen(
                         showOnlyFavorites = !showOnlyFavorites
                     },
                     label = {
-                        Text("Solo favoritos")
+                        Text("Favoritos")
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
