@@ -37,6 +37,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.FilterChip
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 
 
 @Composable
@@ -121,6 +127,19 @@ fun CharactersScreen(
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ){
+
+    var showOnlyFavorites by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val visibleCharacters = if (showOnlyFavorites) {
+        state.data.filter { character ->
+            character.isFavorite
+        }
+    } else {
+        state.data
+    }
+
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -141,6 +160,17 @@ fun CharactersScreen(
                     ),
                     modifier = Modifier.height(60.dp)
                 )
+
+                FilterChip(
+                    selected = showOnlyFavorites,
+                    onClick = {
+                        showOnlyFavorites = !showOnlyFavorites
+                    },
+                    label = {
+                        Text("Solo favoritos")
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
             }
 
             when {
@@ -160,24 +190,43 @@ fun CharactersScreen(
                 }
 
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        items(
-                            items = state.data,
-                            key = { character -> character.id }
-                        ) { character ->
-                            CharacterItem(
-                                character = character,
-                                onClick = {
-                                    onCharacterClick(character.id)
+                    if (visibleCharacters.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (showOnlyFavorites) {
+                                    "No hay personajes favoritos para mostrar."
+                                } else {
+                                    "No hay personajes para mostrar."
                                 },
-                                onFavoriteClick = {
-                                    onFavoriteClick(character.id)
-                                }
+                                style = MaterialTheme.typography.bodyLarge
                             )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            items(
+                                items = visibleCharacters,
+                                key = { character -> character.id }
+                            ) { character ->
+                                CharacterItem(
+                                    character = character,
+                                    onClick = {
+                                        onCharacterClick(character.id)
+                                    },
+                                    onFavoriteClick = {
+                                        onFavoriteClick(character.id)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
