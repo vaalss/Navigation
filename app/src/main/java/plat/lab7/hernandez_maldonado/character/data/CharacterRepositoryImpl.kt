@@ -1,14 +1,19 @@
 package plat.lab7.hernandez_maldonado.character.data
 
+import android.os.SystemClock
+import android.util.Log
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import plat.lab7.hernandez_maldonado.character.domain.CharacterRepository
 import plat.lab7.hernandez_maldonado.character.network.CharacterApi
+import plat.lab7.hernandez_maldonado.core.data.AdaptiveDownloadController
 import plat.lab7.hernandez_maldonado.core.data.AppDatabase
-import android.util.Log
-import kotlinx.coroutines.delay
 
 class CharacterRepositoryImpl(
     private val database: AppDatabase,
@@ -20,50 +25,63 @@ class CharacterRepositoryImpl(
 
     override fun getCharacters(): Flow<List<Character>> {
         return characterDao.getAll().map { entities ->
-            entities.map { entity ->
-                entity.toModel()
-            }
+            entities.map { entity -> entity.toModel() }
         }
     }
 
     override fun getCharacterById(id: Int): Flow<Character?> {
-        return characterDao.getById(id).map { entity ->
-            entity?.toModel()
-        }
+        return characterDao.getById(id).map { entity -> entity?.toModel() }
     }
 
     override suspend fun synchronize() {
+        val startedAt = SystemClock.elapsedRealtime()
         val remoteCharacters = characterApi.getAllCharacters()
-        val characters = mutableListOf<CharacterEntity>()
+        val imagesStartedAt = SystemClock.elapsedRealtime()
 
-        for ((index, dto) in remoteCharacters.withIndex()) {
-            val savedImage = imageStorage.getSavedImage(dto.id)
+        Log.d(
+            "LoginSync",
+            "JSON de personajes: ${imagesStartedAt - startedAt}ms"
+        )
 
-            val localImage = if (savedImage != null) {
-                savedImage
-            } else {
-                delay(1_000)
+        val controller = AdaptiveDownloadController()
+        val completed = AtomicInteger(0)
+        val downloaded = AtomicInteger(0)
 
-                val bytes = characterApi.downloadImage(dto.image)
+        val characters = coroutineScope {
+            remoteCharacters.map { dto ->
+                async {
+                    val savedImage = imageStorage.getSavedImage(dto.id)
 
-                imageStorage.save(
-                    characterId = dto.id,
-                    bytes = bytes
-                )
-            }
+                    val localImage = if (savedImage != null) {
+                        savedImage
+                    } else {
+                        val bytes = controller.execute {
+                            characterApi.downloadImage(dto.image)
+                        }
 
-            characters.add(
-                dto.toEntity().copy(
-                    image = localImage
-                )
-            )
+                        val image = imageStorage.save(dto.id, bytes)
+                        downloaded.incrementAndGet()
+                        image
+                    }
 
-            Log.d(
-                "LoginSync",
-                "Imagen ${index + 1}/${remoteCharacters.size}: " +
-                        if (savedImage != null) "reutilizada" else "descargada"
-            )
+                    val count = completed.incrementAndGet()
+                    Log.d(
+                        "LoginSync",
+                        "Imagen $count/${remoteCharacters.size}: " +
+                                if (savedImage != null) "reutilizada" else "descargada"
+                    )
+
+                    dto.toEntity().copy(image = localImage)
+                }
+            }.awaitAll()
         }
+
+        Log.d(
+            "LoginSync",
+            "Imágenes: ${SystemClock.elapsedRealtime() - imagesStartedAt}ms; " +
+                    "descargadas=${downloaded.get()}; " +
+                    "reutilizadas=${remoteCharacters.size - downloaded.get()}"
+        )
 
         database.useWriterConnection { connection ->
             connection.immediateTransaction {
@@ -73,13 +91,7 @@ class CharacterRepositoryImpl(
         }
     }
 
-    override suspend fun updateFavorite(
-        id: Int,
-        isFavorite: Boolean
-    ) {
-        characterDao.updateFavorite(
-            id = id,
-            isFavorite = isFavorite
-        )
+    override suspend fun updateFavorite(id: Int, isFavorite: Boolean) {
+        characterDao.updateFavorite(id, isFavorite)
     }
 }

@@ -2,13 +2,18 @@ package plat.lab7.hernandez_maldonado.character.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import plat.lab7.hernandez_maldonado.core.network.PageResponseDTO
-import kotlinx.coroutines.delay
-import io.ktor.client.plugins.ClientRequestException
 import io.ktor.http.HttpStatusCode
+import java.time.Duration
+import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import kotlinx.coroutines.delay
 import plat.lab7.hernandez_maldonado.core.domain.ApiRateLimitException
+import plat.lab7.hernandez_maldonado.core.network.PageResponseDTO
 
 class KtorCharacterApi(
     private val httpClient: HttpClient
@@ -27,9 +32,12 @@ class KtorCharacterApi(
 
             characters.addAll(response.results)
             page++
-        } while (response.info.next != null)
+        } while (
+            response.info.next != null &&
+            characters.size < 120
+        )
 
-        return characters
+        return characters.take(120)
     }
 
     override suspend fun downloadImage(url: String): ByteArray {
@@ -37,10 +45,36 @@ class KtorCharacterApi(
             return httpClient.get(url).body()
         } catch (exception: ClientRequestException) {
             if (exception.response.status == HttpStatusCode.TooManyRequests) {
-                throw ApiRateLimitException(exception)
+                throw ApiRateLimitException(
+                    cause = exception,
+                    retryAfterMillis = parseRetryAfter(
+                        exception.response.headers["Retry-After"]
+                    )
+                )
             }
 
             throw exception
+        }
+    }
+
+    private fun parseRetryAfter(value: String?): Long? {
+        val header = value?.trim() ?: return null
+
+        header.toLongOrNull()?.let { seconds ->
+            return seconds.coerceIn(0L, Long.MAX_VALUE / 1_000) * 1_000
+        }
+
+        return try {
+            val retryAt = ZonedDateTime.parse(
+                header,
+                DateTimeFormatter.RFC_1123_DATE_TIME
+            ).toInstant()
+
+            Duration.between(Instant.now(), retryAt)
+                .toMillis()
+                .coerceAtLeast(0L)
+        } catch (exception: DateTimeParseException) {
+            null
         }
     }
 }

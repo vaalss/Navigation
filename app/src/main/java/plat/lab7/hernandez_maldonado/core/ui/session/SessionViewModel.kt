@@ -116,7 +116,7 @@ class SessionViewModel(
                     database.locationDao().deleteAll()
                 }
             }
-
+            app.characterImageStorage.clear()
             preferences.clearName()
         }
     }
