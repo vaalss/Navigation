@@ -12,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import io.ktor.client.plugins.HttpTimeout
 
 object HttpClientFactory {
 
@@ -20,6 +21,11 @@ object HttpClientFactory {
     fun create(): HttpClient {
         return HttpClient(CIO) {
             expectSuccess = true
+            install(HttpTimeout) {
+                connectTimeoutMillis = 30_000
+                socketTimeoutMillis = 30_000
+                requestTimeoutMillis = 60_000
+            }
 
             install(Logging) {
                 level = LogLevel.INFO

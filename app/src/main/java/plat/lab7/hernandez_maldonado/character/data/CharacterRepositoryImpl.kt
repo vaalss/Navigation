@@ -7,10 +7,13 @@ import kotlinx.coroutines.flow.map
 import plat.lab7.hernandez_maldonado.character.domain.CharacterRepository
 import plat.lab7.hernandez_maldonado.character.network.CharacterApi
 import plat.lab7.hernandez_maldonado.core.data.AppDatabase
+import android.util.Log
+import kotlinx.coroutines.delay
 
 class CharacterRepositoryImpl(
     private val database: AppDatabase,
-    private val characterApi: CharacterApi
+    private val characterApi: CharacterApi,
+    private val imageStorage: CharacterImageStorage
 ) : CharacterRepository {
 
     private val characterDao = database.characterDao()
@@ -30,8 +33,36 @@ class CharacterRepositoryImpl(
     }
 
     override suspend fun synchronize() {
-        val characters = characterApi.getAllCharacters().map { dto ->
-            dto.toEntity()
+        val remoteCharacters = characterApi.getAllCharacters()
+        val characters = mutableListOf<CharacterEntity>()
+
+        for ((index, dto) in remoteCharacters.withIndex()) {
+            val savedImage = imageStorage.getSavedImage(dto.id)
+
+            val localImage = if (savedImage != null) {
+                savedImage
+            } else {
+                delay(1_000)
+
+                val bytes = characterApi.downloadImage(dto.image)
+
+                imageStorage.save(
+                    characterId = dto.id,
+                    bytes = bytes
+                )
+            }
+
+            characters.add(
+                dto.toEntity().copy(
+                    image = localImage
+                )
+            )
+
+            Log.d(
+                "LoginSync",
+                "Imagen ${index + 1}/${remoteCharacters.size}: " +
+                        if (savedImage != null) "reutilizada" else "descargada"
+            )
         }
 
         database.useWriterConnection { connection ->

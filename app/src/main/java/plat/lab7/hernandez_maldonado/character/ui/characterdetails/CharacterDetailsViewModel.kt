@@ -7,13 +7,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab7.hernandez_maldonado.RickAndMortyApp
-import plat.lab7.hernandez_maldonado.character.data.toModel
 import plat.lab7.hernandez_maldonado.character.navigation.CharacterDetailsDestination
 
 class CharacterDetailsViewModel(
@@ -21,9 +19,8 @@ class CharacterDetailsViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val characterDao = (application as RickAndMortyApp)
-        .database
-        .characterDao()
+    private val characterRepository = (application as RickAndMortyApp)
+        .characterRepository
 
     private val characterId = savedStateHandle
         .toRoute<CharacterDetailsDestination>()
@@ -49,10 +46,7 @@ class CharacterDetailsViewModel(
 
         loadingJob = viewModelScope.launch {
             try {
-                delay(2000)
-
-                characterDao.getById(characterId).collect { entity ->
-                    val character = entity?.toModel()
+                characterRepository.getCharacterById(characterId).collect { character ->
 
                     _uiState.value = CharacterDetailsUiState(
                         isLoading = false,
@@ -76,7 +70,7 @@ class CharacterDetailsViewModel(
         val character = _uiState.value.data ?: return
 
         viewModelScope.launch {
-            characterDao.updateFavorite(
+            characterRepository.updateFavorite(
                 id = character.id,
                 isFavorite = !character.isFavorite
             )

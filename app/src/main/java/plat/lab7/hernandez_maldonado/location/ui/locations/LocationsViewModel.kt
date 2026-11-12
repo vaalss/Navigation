@@ -5,21 +5,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab7.hernandez_maldonado.RickAndMortyApp
-import plat.lab7.hernandez_maldonado.location.data.toModel
 
 class LocationsViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val locationDao = (application as RickAndMortyApp)
-        .database
-        .locationDao()
+    private val locationRepository = (application as RickAndMortyApp)
+        .locationRepository
 
     private val _uiState = MutableStateFlow(LocationsUiState())
     val uiState: StateFlow<LocationsUiState> = _uiState.asStateFlow()
@@ -41,12 +38,7 @@ class LocationsViewModel(
 
         loadingJob = viewModelScope.launch {
             try {
-                delay(4000)
-
-                locationDao.getAll().collect { entities ->
-                    val locations = entities.map { entity ->
-                        entity.toModel()
-                    }
+                locationRepository.getLocations().collect { locations ->
 
                     _uiState.value = LocationsUiState(
                         isLoading = false,

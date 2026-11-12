@@ -5,6 +5,10 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import plat.lab7.hernandez_maldonado.core.network.PageResponseDTO
+import kotlinx.coroutines.delay
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.http.HttpStatusCode
+import plat.lab7.hernandez_maldonado.core.domain.ApiRateLimitException
 
 class KtorCharacterApi(
     private val httpClient: HttpClient
@@ -15,6 +19,8 @@ class KtorCharacterApi(
         var page = 1
 
         do {
+            delay(1_000)
+
             val response = httpClient.get("character") {
                 parameter("page", page)
             }.body<PageResponseDTO<CharacterDTO>>()
@@ -24,5 +30,17 @@ class KtorCharacterApi(
         } while (response.info.next != null)
 
         return characters
+    }
+
+    override suspend fun downloadImage(url: String): ByteArray {
+        try {
+            return httpClient.get(url).body()
+        } catch (exception: ClientRequestException) {
+            if (exception.response.status == HttpStatusCode.TooManyRequests) {
+                throw ApiRateLimitException(exception)
+            }
+
+            throw exception
+        }
     }
 }

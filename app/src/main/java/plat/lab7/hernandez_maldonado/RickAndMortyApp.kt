@@ -13,6 +13,7 @@ import plat.lab7.hernandez_maldonado.character.data.CharacterRepositoryImpl
 import plat.lab7.hernandez_maldonado.character.domain.CharacterRepository
 import plat.lab7.hernandez_maldonado.location.data.LocationRepositoryImpl
 import plat.lab7.hernandez_maldonado.location.domain.LocationRepository
+import plat.lab7.hernandez_maldonado.character.data.CharacterImageStorage
 
 class RickAndMortyApp : Application() {
 
@@ -39,7 +40,8 @@ class RickAndMortyApp : Application() {
     val characterRepository: CharacterRepository by lazy {
         CharacterRepositoryImpl(
             database = database,
-            characterApi = characterApi
+            characterApi = characterApi,
+            imageStorage = characterImageStorage
         )
     }
 
@@ -48,5 +50,9 @@ class RickAndMortyApp : Application() {
             database = database,
             locationApi = locationApi
         )
+    }
+
+    val characterImageStorage: CharacterImageStorage by lazy {
+        CharacterImageStorage(this)
     }
 }

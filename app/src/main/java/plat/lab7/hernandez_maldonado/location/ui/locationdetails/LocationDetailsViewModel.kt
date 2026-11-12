@@ -7,13 +7,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import plat.lab7.hernandez_maldonado.RickAndMortyApp
-import plat.lab7.hernandez_maldonado.location.data.toModel
 import plat.lab7.hernandez_maldonado.location.navigation.LocationDetailsDestination
 
 class LocationDetailsViewModel(
@@ -21,9 +19,8 @@ class LocationDetailsViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val locationDao = (application as RickAndMortyApp)
-        .database
-        .locationDao()
+    private val locationRepository = (application as RickAndMortyApp)
+        .locationRepository
 
     private val locationId = savedStateHandle
         .toRoute<LocationDetailsDestination>()
@@ -49,10 +46,7 @@ class LocationDetailsViewModel(
 
         loadingJob = viewModelScope.launch {
             try {
-                delay(2000)
-
-                locationDao.getById(locationId).collect { entity ->
-                    val location = entity?.toModel()
+                locationRepository.getLocationById(locationId).collect { location ->
 
                     _uiState.value = LocationDetailsUiState(
                         isLoading = false,
