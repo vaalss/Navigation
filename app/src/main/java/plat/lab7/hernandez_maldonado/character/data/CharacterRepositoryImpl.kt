@@ -94,4 +94,71 @@ class CharacterRepositoryImpl(
     override suspend fun updateFavorite(id: Int, isFavorite: Boolean) {
         characterDao.updateFavorite(id, isFavorite)
     }
+
+    override suspend fun createCharacter(
+        name: String,
+        status: String,
+        species: String,
+        gender: String
+    ): Int {
+        val cleanName = name.trim()
+
+        require(cleanName.isNotBlank()) {
+            "El nombre es obligatorio."
+        }
+
+        return database.useWriterConnection { connection ->
+            connection.immediateTransaction {
+                val id = characterDao.getNextLocalId()
+
+                characterDao.insert(
+                    CharacterEntity(
+                        id = id,
+                        name = cleanName,
+                        status = status.trim(),
+                        species = species.trim(),
+                        gender = gender.trim(),
+                        image = "",
+                        isFavorite = false
+                    )
+                )
+
+                id
+            }
+        }
+    }
+
+    override suspend fun updateCharacter(
+        id: Int,
+        name: String,
+        status: String,
+        species: String,
+        gender: String
+    ) {
+        val cleanName = name.trim()
+
+        require(cleanName.isNotBlank()) {
+            "El nombre es obligatorio."
+        }
+
+        val updatedRows = characterDao.updateCharacter(
+            id = id,
+            name = cleanName,
+            status = status.trim(),
+            species = species.trim(),
+            gender = gender.trim()
+        )
+
+        check(updatedRows == 1) {
+            "El personaje ya no existe."
+        }
+    }
+
+    override suspend fun deleteCharacter(id: Int) {
+        val deletedRows = characterDao.deleteCharacter(id)
+
+        check(deletedRows == 1) {
+            "El personaje ya no existe."
+        }
+    }
 }

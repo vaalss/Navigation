@@ -43,6 +43,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.Add
+import plat.lab7.hernandez_maldonado.R
 
 
 @Composable
@@ -61,7 +63,8 @@ private fun CharacterItem(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         AsyncImage(
-            model = character.image,
+            model = character.image.takeIf { it.isNotBlank() }
+                ?: R.drawable.rick_and_morty,
             contentDescription = "Imagen de ${character.name}",
             modifier = Modifier
                 .size(72.dp)
@@ -125,6 +128,7 @@ fun CharactersScreen(
     onFavoriteClick: (Int) -> Unit,
     onLoadingClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onAddClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ){
 
@@ -153,6 +157,14 @@ fun CharactersScreen(
                 TopAppBar(
                     title = {
                         Text(text = "Characters")
+                    },
+                    actions = {
+                        IconButton(onClick = onAddClick) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Crear personaje"
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,

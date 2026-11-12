@@ -25,4 +25,31 @@ interface CharacterDao {
 
     @Query("DELETE FROM characters")
     suspend fun deleteAll()
+
+    @Query("SELECT COALESCE(MIN(id), 0) - 1 FROM characters WHERE id < 0")
+    suspend fun getNextLocalId(): Int
+
+    @Insert
+    suspend fun insert(character: CharacterEntity)
+
+    @Query(
+        """
+    UPDATE characters
+    SET name = :name,
+        status = :status,
+        species = :species,
+        gender = :gender
+    WHERE id = :id
+    """
+    )
+    suspend fun updateCharacter(
+        id: Int,
+        name: String,
+        status: String,
+        species: String,
+        gender: String
+    ): Int
+
+    @Query("DELETE FROM characters WHERE id = :id")
+    suspend fun deleteCharacter(id: Int): Int
 }
