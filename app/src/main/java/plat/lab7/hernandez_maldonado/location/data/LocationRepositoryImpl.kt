@@ -17,28 +17,29 @@ class LocationRepositoryImpl(
 
     override fun getLocations(): Flow<List<Location>> {
         return locationDao.getAll().map { entities ->
-            entities.map { entity ->
-                entity.toModel()
-            }
+            entities.map { entity -> entity.toModel() }
         }
     }
 
     override fun getLocationById(id: Int): Flow<Location?> {
-        return locationDao.getById(id).map { entity ->
-            entity?.toModel()
-        }
+        return locationDao.getById(id).map { entity -> entity?.toModel() }
     }
 
     override suspend fun synchronize() {
-        val locations = locationApi.getAllLocations().map { dto ->
-            dto.toEntity()
-        }
+        val locations = locationApi.getAllLocations().map { dto -> dto.toEntity() }
 
         database.useWriterConnection { connection ->
             connection.immediateTransaction {
                 locationDao.deleteAll()
                 locationDao.insertAll(locations)
             }
+        }
+    }
+
+    override suspend fun toggleFavorite(id: Int) {
+        val updatedRows = locationDao.toggleFavorite(id)
+        check(updatedRows == 1) {
+            "La ubicación ya no existe."
         }
     }
 }
